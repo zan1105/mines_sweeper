@@ -53,6 +53,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
+	// 更新窗口参数
 	startY = 0.1 * height();
 	max_width = std::min(width(), height() - startY);
 	startX = (width() - max_width) / 2;
@@ -109,15 +110,15 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 	pressX = event->position().x();
 	pressY = event->position().y();
 	if (pressY < startY && pressX > (width() - cell_width) / 2 &&
-	    pressX < (width() + cell_width) / 2) {
+	    pressX < (width() + cell_width) / 2) { // 点击笑脸刷新游戏
 		state = 1;
 		start = false;
 		mineMap->restart(n_width, n_height, mineNum);
-	} else if (state > 1) {
+	} else if (state > 1) { // 游戏结束，不响应点击事件
 		return;
 
 	} else if (pressX > startX && pressX < startX + n_width * cell_width && pressY > startY &&
-	           pressY < startY + n_height * cell_width) {
+	           pressY < startY + n_height * cell_width) { // 点击雷区
 		int x = (pressX - startX) / cell_width;
 		int y = (pressY - startY) / cell_width;
 		if (event->button() == Qt::LeftButton) {
@@ -126,19 +127,19 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 			mineMap->rightClick(x, y);
 		}
 		update();
-		if (start == false) {
+		if (start == false) { // 开始计时
 			start = true;
 			time = 0;
 		}
 	}
 
-	update();
+	update(); // 重绘
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 	if (event->button() != Qt::LeftButton && event->button() != Qt::RightButton || state > 1)
 		return;
-	if (state == 1) state = 0;
+	if (state == 1) state = 0; // 恢复笑脸
 
 	update();
 }

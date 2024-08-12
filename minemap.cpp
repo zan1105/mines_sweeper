@@ -8,7 +8,7 @@ void MineMap::restart(int width, int height, int mines) {
 	else {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				m_map[i][j] = 0;
+				m_map[i][j] = 0; // 重置地图
 			}
 		}
 	}
@@ -38,7 +38,7 @@ void MineMap::leftClick(int x, int y) {
 			}
 			m_map[x][y] = 0;
 			_fault_tolerance = false;
-			_calculateNumbers();
+			_calculateNumbers(); // 重新计算数字
 			leftClick(x, y);
 		} else { // 游戏结束
 			for (int i = 0; i < m_map.size(); i++) {
@@ -56,7 +56,7 @@ void MineMap::leftClick(int x, int y) {
 	} else { // 数字区域
 		m_map[x][y] += 10;
 		_openedCellNum++;
-		if (_fault_tolerance) {
+		if (_fault_tolerance) { // 首次点击时将附近的非雷格子翻开
 			_fault_tolerance = false;
 			for (int i = x - 1; i <= x + 1; i++) {
 				for (int j = y - 1; j <= y + 1; j++) {

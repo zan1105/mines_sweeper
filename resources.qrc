@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/cellup.svg</file>
+        <file>img/cell1.svg</file>
+        <file>img/cell2.svg</file>
+        <file>img/cell3.svg</file>
+        <file>img/cell4.svg</file>
+        <file>img/cell5.svg</file>
+        <file>img/cell6.svg</file>
+        <file>img/cell7.svg</file>
+        <file>img/cell8.svg</file>
+        <file>img/cellflag.svg</file>
+        <file>img/celldown.svg</file>
+        <file>img/lostface.svg</file>
+        <file>img/smileface.svg</file>
+        <file>img/smilefacedown.svg</file>
+        <file>img/cellmine.svg</file>
+        <file>img/blast.svg</file>
+        <file>img/counter0.svg</file>
+        <file>img/counter1.svg</file>
+        <file>img/counter2.svg</file>
+        <file>img/counter3.svg</file>
+        <file>img/counter4.svg</file>
+        <file>img/counter5.svg</file>
+        <file>img/counter6.svg</file>
+        <file>img/counter7.svg</file>
+        <file>img/counter8.svg</file>
+        <file>img/counter9.svg</file>
+        <file>img/winface.svg</file>
+    </qresource>
+</RCC>

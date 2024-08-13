@@ -63,10 +63,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		radioButtons.push_back(radioButton);
 		connect(radioButton, &QRadioButton::clicked, this, [=]() { customParams(i); });
 	}
+
+	timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, this, &MainWindow::updateTime);
 }
 
 MainWindow::~MainWindow() {
 
+	delete timer;                         // 释放计时器对象
 	delete GameInfoButton;                // 释放按钮对象
 	for (auto radioButton : radioButtons) // 释放单选按钮对象
 		delete radioButton;
@@ -115,7 +119,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	}
 
 	// 绘制状态
-	state = state == 0 ? mineMap->getGameStatus() : state;
 	stateSvgs[state]->render(&painter,
 	                         QRect((width() - cell_width) / 2, menuHeight, cell_width, cell_width));
 
@@ -132,10 +135,8 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 				cellSvgs[val - 10]->render(&painter, rect);
 			else if (val < 30) // 标记格子
 				cellSvgs[11]->render(&painter, rect);
-			else { // 提示格子
+			else // 提示格子
 				cellSvgs[0]->render(&painter, rect);
-				mineMap->setVal(i, j, val - 30);
-			}
 		}
 	}
 }
@@ -161,10 +162,12 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 		} else {
 			mineMap->rightClick(x, y);
 		}
+		state = state == 0 ? mineMap->getGameStatus() : state;
 		update();
 		if (start == false) { // 开始计时
 			start = true;
 			startTime = std::chrono::system_clock::now();
+			timer->start(100);
 		}
 	}
 
@@ -175,6 +178,23 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 	if (event->button() != Qt::LeftButton && event->button() != Qt::RightButton || state > 1)
 		return;
 	if (state == 1) state = 0; // 恢复笑脸
+
+	// 撤销提示
+	if (pressX > startX && pressX < startX + n_width * cell_width && pressY > startY &&
+	    pressY < startY + n_height * cell_width) {
+		int x = (pressX - startX) / cell_width;
+		int y = (pressY - startY) / cell_width;
+		if (mineMap->getVal(x, y) >= 10 && mineMap->getVal(x, y) < 20) {
+			for (int i = x - 1; i <= x + 1; i++) {
+				for (int j = y - 1; j <= y + 1; j++) {
+					if (i >= 0 && i < n_width && j >= 0 && j < n_height &&
+					    mineMap->getVal(i, j) >= 30) {
+						mineMap->setVal(i, j, mineMap->getVal(i, j) - 30);
+					}
+				}
+			}
+		}
+	}
 
 	update();
 }
@@ -204,4 +224,11 @@ void MainWindow::customParams(int index) {
 	state = 0;
 	mineMap->restart(n_width, n_height, mineNum);
 	update();
+}
+
+void MainWindow::updateTime() {
+	if (start && state < 2) {
+		update();
+		timer->start(100);
+	}
 }

@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QInputDialog>
+#include <QTimer>
 #include <vector>
 #include <chrono>
 
@@ -37,6 +38,7 @@ protected:
 private slots:
 	void showGameInfo();          //	游戏玩法按钮点击事件
 	void customParams(int index); //	自定义按钮点击事件
+	void updateTime();            //	更新计时器
 
 private:
 	Ui::MainWindow *ui;
@@ -53,7 +55,8 @@ private:
 	int       pressX;          //	按下的X坐标
 	int       pressY;          //	按下的Y坐标
 	bool      start;           //	游戏是否开始
-	MineMap  *mineMap;         //	雷区
+	MineMap  *mineMap;         //	雷区地图
+	QTimer   *timer;           //	计时器
 
 	std::chrono::time_point<std::chrono::system_clock> startTime; //	游戏开始时间
 

@@ -38,13 +38,50 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	             new QSvgRenderer(QString(":/img/lostface.svg")),
 	             new QSvgRenderer(QString(":/img/winface.svg"))};
 
+	//
+	// 初始化游戏参数
+	time = 0;
 	n_width = 9;
 	n_height = 9;
 	mineNum = 10;
-	start = false;
-	time = 0;
 	mineMap = new MineMap(n_width, n_height, mineNum);
 	state = mineMap->getGameStatus();
+	startY = 0.15 * height();
+	max_width = std::min(width(), height() - startY);
+	startX = (width() - max_width) / 2;
+
+	// 创建按钮
+	for (int i = 0; i < 5; i++) {
+		QRadioButton *radioButton = new QRadioButton(this);
+        radioButton->setGeometry(75 * i, 0, 75, startY / 3);
+		radioButton->setText(texts[i]);
+		radioButton->setCheckable(true);
+		radioButton->setChecked(i == 0);
+		radioButton->show();
+		radioButtons.push_back(radioButton);
+		connect(radioButton, &QRadioButton::clicked, [=]() {
+			if (i < 4) {
+				n_width = cellNums[i][0];
+				n_height = cellNums[i][1];
+				mineNum = cellNums[i][2];
+			} else {
+				bool ok;
+				int n = QInputDialog::getInt(this, "自定义", "请输入宽度", 9, 9, 100, 1, &ok);
+				if (!ok) return;
+				n_width = n;
+				n = QInputDialog::getInt(this, "自定义", "请输入高度", 9, 9, 100, 1, &ok);
+				if (!ok) return;
+				n_height = n;
+				n = QInputDialog::getInt(this, "自定义", "请输入雷数", 10, 10,
+				                         n_width * n_height - 1, 1, &ok);
+				if (!ok) return;
+				mineNum = n;
+			}
+			start = false;
+			mineMap->restart(n_width, n_height, mineNum);
+			update();
+		});
+	}
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -54,7 +91,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	// 更新窗口参数
-	startY = 0.1 * height();
+	startY = 0.15 * height();
 	max_width = std::min(width(), height() - startY);
 	startX = (width() - max_width) / 2;
 	cell_width = std::min(max_width / n_width, max_width / n_height);
@@ -66,8 +103,8 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	// 绘制雷数
 	int cnt = std::max(0, mineNum - mineMap->getMarkedCellNum());
 	for (int i = 2; i >= 0; i--) {
-		counterSvgs[cnt % 10]->render(&painter,
-		                              QRect(startX + i * cntWidth, 0, cntWidth, cell_width));
+		counterSvgs[cnt % 10]->render(
+		    &painter, QRect(startX + i * cntWidth, startY / 3, cntWidth, cell_width));
 		cnt /= 10;
 	}
 
@@ -75,14 +112,14 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	cnt = int(time);
 	for (int i = 1; i <= 3; i++) {
 		counterSvgs[cnt % 10]->render(
-		    &painter, QRect(width() - startX - i * cntWidth, 0, cntWidth, cell_width));
+		    &painter, QRect(width() - startX - i * cntWidth, startY / 3, cntWidth, cell_width));
 		cnt /= 10;
 	}
 
 	// 绘制状态
 	state = state == 0 ? mineMap->getGameStatus() : state;
 	stateSvgs[state]->render(&painter,
-	                         QRect((width() - cell_width) / 2, 0, cell_width, cell_width));
+	                         QRect((width() - cell_width) / 2, startY / 3, cell_width, cell_width));
 
 	// 绘制网格
 	for (int i = 0; i < n_width; i++) {

@@ -6,6 +6,8 @@
 #include <QMouseEvent>
 #include <QtSvg>
 #include <QPainter>
+#include <QRadioButton>
+#include <QInputDialog>
 #include <vector>
 
 #include "minemap.h"
@@ -47,8 +49,13 @@ private:
 	bool     start;      //	游戏是否开始
 	MineMap *mineMap;    //	雷区
 
-	std::vector<QSvgRenderer *> cellSvgs;    //	单元格图片集
-	std::vector<QSvgRenderer *> counterSvgs; //	计数器数字图片集
-	std::vector<QSvgRenderer *> stateSvgs;   //	游戏状态图片集
+	const QString *texts = new QString[5]{"初级", "中级", "高级", "专家", "自定义"};
+
+	const int cellNums[4][3] = {{9, 9, 10}, {16, 16, 40}, {30, 16, 99}, {46, 22, 208}};
+
+	std::vector<QSvgRenderer *> cellSvgs;     //	单元格图片集
+	std::vector<QSvgRenderer *> counterSvgs;  //	计数器数字图片集
+	std::vector<QSvgRenderer *> stateSvgs;    //	游戏状态图片集
+	std::vector<QRadioButton *> radioButtons; //	单选按钮集
 };
 #endif //	MAINWINDOW_H

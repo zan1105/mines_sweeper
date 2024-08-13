@@ -1,6 +1,6 @@
-#include <QMessageBox>
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -38,25 +38,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	             new QSvgRenderer(QString(":/img/lostface.svg")),
 	             new QSvgRenderer(QString(":/img/winface.svg"))};
 
-	//
-	// 初始化游戏参数
+	// 初始化游戏玩法参数
 	time = 0;
 	n_width = 9;
 	n_height = 9;
 	mineNum = 10;
 	mineMap = new MineMap(n_width, n_height, mineNum);
 	state = mineMap->getGameStatus();
-	startY = 0.15 * height();
-	max_width = std::min(width(), height() - startY);
-	startX = (width() - max_width) / 2;
 
-	// 创建按钮
+	// 初始化按钮
+	// 点击按钮显示游戏玩法
+	GameInfoButton = new QPushButton("玩法说明", this);
+	GameInfoButton->setGeometry(0, 0, 80, menuHeight);
+	connect(GameInfoButton, &QPushButton::clicked, this, &MainWindow::showGameInfo);
+
+	// 单选按钮选择游戏难度
 	for (int i = 0; i < 5; i++) {
 		QRadioButton *radioButton = new QRadioButton(this);
-        radioButton->setGeometry(75 * i, 0, 75, startY / 3);
+		radioButton->setGeometry(80 + 75 * i, 0, 75, menuHeight);
 		radioButton->setText(texts[i]);
 		radioButton->setCheckable(true);
-		radioButton->setChecked(i == 0);
+		// radioButton->setChecked(i == 0);
 		radioButton->show();
 		radioButtons.push_back(radioButton);
 		connect(radioButton, &QRadioButton::clicked, [=]() {
@@ -66,10 +68,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 				mineNum = cellNums[i][2];
 			} else {
 				bool ok;
-				int n = QInputDialog::getInt(this, "自定义", "请输入宽度", 9, 9, 100, 1, &ok);
+				int n = QInputDialog::getInt(this, "自定义", "请输入水平格子数", 9, 9, 100, 1, &ok);
 				if (!ok) return;
 				n_width = n;
-				n = QInputDialog::getInt(this, "自定义", "请输入高度", 9, 9, 100, 1, &ok);
+				n = QInputDialog::getInt(this, "自定义", "请输入垂直格子数", 9, 9, 100, 1, &ok);
 				if (!ok) return;
 				n_height = n;
 				n = QInputDialog::getInt(this, "自定义", "请输入雷数", 10, 10,
@@ -84,17 +86,31 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	}
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+
+	delete GameInfoButton;                // 释放按钮对象
+	for (auto radioButton : radioButtons) // 释放单选按钮对象
+		delete radioButton;
+	for (auto cellSvg : cellSvgs) // 释放单元格图片对象
+		delete cellSvg;
+	for (auto counterSvg : counterSvgs) // 释放计数器图片对象
+		delete counterSvg;
+	for (auto stateSvg : stateSvgs) // 释放状态图片对象
+		delete stateSvg;
+
+	delete mineMap; // 释放雷区对象
+	delete[] texts; // 释放游戏难度文本
+	delete ui;
+}
 
 void MainWindow::paintEvent(QPaintEvent *event) {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	// 更新窗口参数
-	startY = 0.15 * height();
-	max_width = std::min(width(), height() - startY);
-	startX = (width() - max_width) / 2;
-	cell_width = std::min(max_width / n_width, max_width / n_height);
+	cell_width = std::min(width() / n_width, (height() - menuHeight) / (n_height + 1));
+	startY = menuHeight + cell_width;
+	startX = (width() - cell_width * n_width) / 2;
 	cntWidth = cell_width * 13 / 23;
 	// 绘制背景
 	// painter.setBrush(QBrush(QColor(192, 0, 0)));
@@ -104,7 +120,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	int cnt = std::max(0, mineNum - mineMap->getMarkedCellNum());
 	for (int i = 2; i >= 0; i--) {
 		counterSvgs[cnt % 10]->render(
-		    &painter, QRect(startX + i * cntWidth, startY / 3, cntWidth, cell_width));
+		    &painter, QRect(startX + i * cntWidth, menuHeight, cntWidth, cell_width));
 		cnt /= 10;
 	}
 
@@ -112,14 +128,14 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	cnt = int(time);
 	for (int i = 1; i <= 3; i++) {
 		counterSvgs[cnt % 10]->render(
-		    &painter, QRect(width() - startX - i * cntWidth, startY / 3, cntWidth, cell_width));
+		    &painter, QRect(width() - startX - i * cntWidth, menuHeight, cntWidth, cell_width));
 		cnt /= 10;
 	}
 
 	// 绘制状态
 	state = state == 0 ? mineMap->getGameStatus() : state;
 	stateSvgs[state]->render(&painter,
-	                         QRect((width() - cell_width) / 2, startY / 3, cell_width, cell_width));
+	                         QRect((width() - cell_width) / 2, menuHeight, cell_width, cell_width));
 
 	// 绘制网格
 	for (int i = 0; i < n_width; i++) {
@@ -180,3 +196,5 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 
 	update();
 }
+
+void MainWindow::showGameInfo() { QMessageBox::information(this, "游戏玩法说明", GameInfo); }

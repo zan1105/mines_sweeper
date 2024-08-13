@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	             new QSvgRenderer(QString(":/img/winface.svg"))};
 
 	// 初始化游戏玩法参数
-	time = 0;
+	start = false;
 	n_width = 9;
 	n_height = 9;
 	mineNum = 10;
@@ -55,34 +55,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// 单选按钮选择游戏难度
 	for (int i = 0; i < 5; i++) {
 		QRadioButton *radioButton = new QRadioButton(this);
-		radioButton->setGeometry(80 + 75 * i, 0, 75, menuHeight);
-		radioButton->setText(texts[i]);
-		radioButton->setCheckable(true);
-		// radioButton->setChecked(i == 0);
+		radioButton->setGeometry(80 + 75 * i, 0, 75, menuHeight); // 按钮位置
+		radioButton->setText(texts[i]);                           // 按钮文本
+		radioButton->setCheckable(true);                          // 设置是否可选
+		radioButton->setChecked(i == 0);                          // 设置默认选中
 		radioButton->show();
 		radioButtons.push_back(radioButton);
-		connect(radioButton, &QRadioButton::clicked, [=]() {
-			if (i < 4) {
-				n_width = cellNums[i][0];
-				n_height = cellNums[i][1];
-				mineNum = cellNums[i][2];
-			} else {
-				bool ok;
-				int n = QInputDialog::getInt(this, "自定义", "请输入水平格子数", 9, 9, 100, 1, &ok);
-				if (!ok) return;
-				n_width = n;
-				n = QInputDialog::getInt(this, "自定义", "请输入垂直格子数", 9, 9, 100, 1, &ok);
-				if (!ok) return;
-				n_height = n;
-				n = QInputDialog::getInt(this, "自定义", "请输入雷数", 10, 10,
-				                         n_width * n_height - 1, 1, &ok);
-				if (!ok) return;
-				mineNum = n;
-			}
-			start = false;
-			mineMap->restart(n_width, n_height, mineNum);
-			update();
-		});
+		connect(radioButton, &QRadioButton::clicked, this, [=]() { customParams(i); });
 	}
 }
 
@@ -125,7 +104,10 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	}
 
 	// 绘制时间
-	cnt = int(time);
+	cnt = start ? std::chrono::duration_cast<std::chrono::seconds>(
+	                  std::chrono::system_clock::now() - startTime)
+	                  .count()
+	            : 0;
 	for (int i = 1; i <= 3; i++) {
 		counterSvgs[cnt % 10]->render(
 		    &painter, QRect(width() - startX - i * cntWidth, menuHeight, cntWidth, cell_width));
@@ -182,7 +164,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 		update();
 		if (start == false) { // 开始计时
 			start = true;
-			time = 0;
+			startTime = std::chrono::system_clock::now();
 		}
 	}
 
@@ -198,3 +180,28 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void MainWindow::showGameInfo() { QMessageBox::information(this, "游戏玩法说明", GameInfo); }
+
+void MainWindow::customParams(int index) {
+
+	if (index < 4) {
+		n_width = cellNums[index][0];
+		n_height = cellNums[index][1];
+		mineNum = cellNums[index][2];
+	} else {
+		bool ok;
+		int new_numX = QInputDialog::getInt(this, "自定义", "请输入水平格子数", 9, 9, 100, 1, &ok);
+		if (!ok) return;
+		int new_numY = QInputDialog::getInt(this, "自定义", "请输入垂直格子数", 9, 9, 100, 1, &ok);
+		if (!ok) return;
+		int n = QInputDialog::getInt(this, "自定义", "请输入雷数", 10, 10, new_numX * new_numY / 2,
+		                             1, &ok);
+		if (!ok) return;
+		n_width = new_numX;
+		n_height = new_numY;
+		mineNum = n;
+	}
+	start = false;
+	state = 0;
+	mineMap->restart(n_width, n_height, mineNum);
+	update();
+}

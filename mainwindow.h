@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QInputDialog>
 #include <vector>
+#include <chrono>
 
 #include "minemap.h"
 
@@ -34,7 +35,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *event); //	鼠标释放事件
 
 private slots:
-	void showGameInfo(); //	游戏玩法按钮点击事件
+	void showGameInfo();          //	游戏玩法按钮点击事件
+	void customParams(int index); //	自定义按钮点击事件
 
 private:
 	Ui::MainWindow *ui;
@@ -43,7 +45,6 @@ private:
 	int       n_width;         //	水平方向的格子数
 	int       n_height;        //	垂直方向的格子数
 	int       mineNum;         //	雷数
-	double    time;            //	时间
 	int       startY;          //	起始Y坐标
 	int       startX;          //	起始X坐标
 	int       cell_width;      //	格子宽度
@@ -53,6 +54,8 @@ private:
 	int       pressY;          //	按下的Y坐标
 	bool      start;           //	游戏是否开始
 	MineMap  *mineMap;         //	雷区
+
+	std::chrono::time_point<std::chrono::system_clock> startTime; //	游戏开始时间
 
 	const int     cellNums[4][3] = {{9, 9, 10}, {16, 16, 40}, {30, 16, 99}, {46, 22, 208}};
 	const QString GameInfo =

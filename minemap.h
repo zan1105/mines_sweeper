@@ -25,12 +25,13 @@ public:
 	int  getMarkedCellNum() { return _markedCellNum; }        // 获取标记的格子数
 
 private:
-	void _generate(int mines);               // 生成雷区
-	void _expandEmptyArea(int x, int y);     // 递归展开空白区域
-	void _calculateNumbers();                // 计算范围内的雷数
-	void _calculateCellNumber(int x, int y); // 计算指定块周围的雷数
-	void _remainingTips(int x, int y);       // 提示范围内未翻开的块
-	bool _judgeGameOver(int x, int y);       // 判断游戏是否结束
+	void _generate(int mines);                     // 生成雷区
+	void _expandEmptyArea(int x, int y);           // 递归展开空白区域
+	void _calculateNumbers();                      // 计算范围内的雷数
+	void _calculateCellNumber(int x, int y);       // 计算指定块周围的雷数
+	void _remainingTips(int x, int y);             // 提示范围内未翻开的块
+	bool _helper1(int x, int y, bool honrizontal); // _tryChooseOne 使用的辅助函数
+	bool _tryChooseOne(int x, int y);              // 二选一
 
 private:
 	bool _gameOver;

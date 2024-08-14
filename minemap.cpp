@@ -41,6 +41,11 @@ void MineMap::leftClick(int x, int y) {
 			_calculateNumbers(); // 重新计算数字
 			leftClick(x, y);     // 重新点击
 
+		} else if (_tryChooseOne(x, y)) { // 尝试能否满足二选一
+			m_map[x][y] = 0;
+			_calculateCellNumber(x, y);
+			leftClick(x, y);
+
 		} else {                                 // 游戏结束
 			for (int i = 0; i < mapWidth; i++) { // 翻开所有雷
 				for (int j = 0; j < mapHeight; j++) {
@@ -169,10 +174,53 @@ int MineMap::getGameStatus() {
 	if (_gameOver) {
 		return 2;
 	} else if (_markedCellNum == mapWidth * mapHeight - _openedCellNum) {
+		_markedCellNum = 0;
 		return 3;
 	} else {
 		return 0;
 	}
 }
 
-bool MineMap::_judgeGameOver(int x, int y) { return true; }
+bool MineMap::_helper1(int x, int y, bool honrizontal) {
+	if (honrizontal) {
+		for (int i = x - 1; i <= x + 2; i += 3) {
+			if (i < 0 || i >= mapWidth) continue;
+			for (int j = y - 1; j <= y + 1; j++) {
+				if (j >= 0 && j < mapHeight && m_map[i][j] % 10 != 9) {
+					return false;
+				}
+			}
+		}
+	} else {
+		for (int j = y - 1; j <= y + 2; j += 3) {
+			if (j < 0 || j >= mapHeight) continue;
+			for (int i = x - 1; i <= x + 1; i++) {
+				if (i >= 0 && i < mapWidth && m_map[i][j] % 10 != 9) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool MineMap::_tryChooseOne(int x, int y) {
+	if (x - 1 >= 0 && m_map[x - 1][y] < 9 && _helper1(x - 1, y, true)) { // 左边未翻开
+		m_map[x - 1][y] = 9;
+		return true;
+	}
+	if (x + 1 < mapWidth && m_map[x + 1][y] < 9 && _helper1(x, y, true)) { // 右边未翻开
+		m_map[x + 1][y] = 9;
+		return true;
+	}
+	if (y - 1 >= 0 && m_map[x][y - 1] < 9 && _helper1(x, y - 1, false)) { // 上边未翻开
+		m_map[x][y - 1] = 9;
+		return true;
+	}
+	if (y + 1 < mapHeight && m_map[x][y + 1] < 9 && _helper1(x, y, false)) { // 下边未翻开
+		m_map[x][y + 1] = 9;
+		return true;
+	}
+
+	return false;
+}

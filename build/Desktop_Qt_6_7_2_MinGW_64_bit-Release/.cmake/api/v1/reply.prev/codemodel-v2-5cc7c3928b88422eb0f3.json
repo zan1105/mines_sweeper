@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Release-71f42559da14dec2cbf0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "mines_sweeper",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "mines_sweeper::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mines_sweeper-Release-61f5a96f54b743267de6.json",
+					"name" : "mines_sweeper",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mines_sweeper_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mines_sweeper_autogen-Release-1c7b53b0a1869786594c.json",
+					"name" : "mines_sweeper_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mines_sweeper_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mines_sweeper_autogen_timestamp_deps-Release-eb38cf823069674d7a3f.json",
+					"name" : "mines_sweeper_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/leeza/OneDrive/Codes/vsCode_C++/mines_sweeper/build/Desktop_Qt_6_7_2_MinGW_64_bit-Release",
+		"source" : "C:/Users/leeza/OneDrive/Codes/vsCode_C++/mines_sweeper"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

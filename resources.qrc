@@ -27,5 +27,6 @@
         <file>img/counter8.svg</file>
         <file>img/counter9.svg</file>
         <file>img/winface.svg</file>
+        <file>img/flag.svg</file>
     </qresource>
 </RCC>

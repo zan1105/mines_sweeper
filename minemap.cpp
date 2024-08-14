@@ -1,8 +1,9 @@
 #include <stdlib.h>
+#include <ctime>
 #include "minemap.h"
-#include <iostream>
 
 void MineMap::restart(int width, int height, int mines) {
+	std::srand(std::time(nullptr));
 	if (width != mapWidth || height != mapHeight) {
 		mapWidth = width;
 		mapHeight = height;
@@ -30,8 +31,8 @@ void MineMap::leftClick(int x, int y) {
 	} else if (m_map[x][y] == 9) { // 踩雷
 		if (_openedCellNum == 0) { // 首次容错
 			while (true) {         // 将雷与一个非雷交换
-				int i = rand() % mapWidth;
-				int j = rand() % mapHeight;
+				int i = std::rand() % mapWidth;
+				int j = std::rand() % mapHeight;
 				if (m_map[i][j] != 9) {
 					m_map[i][j] = 9;
 					break;
@@ -94,8 +95,8 @@ void MineMap::rightClick(int x, int y) {
 void MineMap::_generate(int mines) {
 	// 布雷
 	while (mines) {
-		int x = rand() % mapWidth;
-		int y = rand() % mapHeight;
+		int x = std::rand() % mapWidth;
+		int y = std::rand() % mapHeight;
 		if (m_map[x][y] != 9) {
 			m_map[x][y] = 9;
 			mines--;

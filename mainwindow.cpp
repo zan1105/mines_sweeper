@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	             new QSvgRenderer(QString(":/img/winface.svg"))};
 
 	// 初始化游戏玩法参数
+	lastTime = 0;
+	showNumber = false;
 	start = false;
 	n_width = 9;
 	n_height = 9;
@@ -108,14 +110,15 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	}
 
 	// 绘制时间
-	cnt = start ? std::chrono::duration_cast<std::chrono::seconds>(
-	                  std::chrono::system_clock::now() - startTime)
-	                  .count()
-	            : 0;
+	lastTime = start ? std::chrono::duration_cast<std::chrono::seconds>(
+	                       std::chrono::system_clock::now() - startTime)
+	                       .count()
+	                 : lastTime;
+	int curTime = std::min(lastTime, 999);
 	for (int i = 1; i <= 3; i++) {
-		counterSvgs[cnt % 10]->render(
+		counterSvgs[curTime % 10]->render(
 		    &painter, QRect(width() - startX - i * cntWidth, menuHeight, cntWidth, cell_width));
-		cnt /= 10;
+		curTime /= 10;
 	}
 
 	// 绘制状态
@@ -133,9 +136,12 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 				cellSvgs[10]->render(&painter, rect);
 			else if (val < 20) // 翻开格子
 				cellSvgs[val - 10]->render(&painter, rect);
-			else if (val < 30) // 标记格子
-				cellSvgs[11]->render(&painter, rect);
-			else // 提示格子
+			else if (val < 30) { // 标记格子，踩雷后闪烁
+				if (state == 2 && val != 29 && showNumber) {
+					cellSvgs[val - 20]->render(&painter, rect);
+				} else
+					cellSvgs[11]->render(&painter, rect);
+			} else // 提示格子
 				cellSvgs[0]->render(&painter, rect);
 		}
 	}
@@ -149,6 +155,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 	    pressX < (width() + cell_width) / 2) { // 点击笑脸刷新游戏
 		state = 1;
 		start = false;
+		lastTime = 0;
 		mineMap->restart(n_width, n_height, mineNum);
 	} else if (state > 1) { // 游戏结束，不响应点击事件
 		return;
@@ -163,7 +170,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 			mineMap->rightClick(x, y);
 		}
 		state = state == 0 ? mineMap->getGameStatus() : state;
-		update();
 		if (start == false) { // 开始计时
 			start = true;
 			startTime = std::chrono::system_clock::now();
@@ -220,6 +226,7 @@ void MainWindow::customParams(int index) {
 		n_height = new_numY;
 		mineNum = n;
 	}
+	lastTime = 0;
 	start = false;
 	state = 0;
 	mineMap->restart(n_width, n_height, mineNum);
@@ -230,5 +237,10 @@ void MainWindow::updateTime() {
 	if (start && state < 2) {
 		update();
 		timer->start(100);
+	} else if (state == 2) {
+		showNumber = !showNumber;
+		start = false;
+		update();
+		timer->start(1000);
 	}
 }

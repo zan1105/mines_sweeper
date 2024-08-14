@@ -55,6 +55,8 @@ private:
 	int       pressX;          //	按下的X坐标
 	int       pressY;          //	按下的Y坐标
 	bool      start;           //	游戏是否开始
+	int       lastTime;        //	上一次的时间
+	bool      showNumber;      //	踩雷后当前绘制被标记格子是否显示数字
 	MineMap  *mineMap;         //	雷区地图
 	QTimer   *timer;           //	计时器
 

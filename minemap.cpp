@@ -50,12 +50,13 @@ void MineMap::leftClick(int x, int y) {
 				}
 			}
 			m_map[x][y] = -1; // 标记踩到的雷
+			_markedCellNum = 0;
 			_gameOver = true;
 		}
 	} else if (m_map[x][y] == 0) { // 空白块
 		_expandEmptyArea(x, y);    // 展开空白区域
 
-	} else { // 数字区域
+	} else if (m_map[x][y] > 0) { // 数字区域
 		m_map[x][y] += 10;
 		_openedCellNum++;
 		if (_openedCellNum == 1) { // 首次点击时将附近的非雷格子翻开
@@ -151,7 +152,11 @@ void MineMap::_remainingTips(int x, int y) {
 	}
 	if (tag >= m_map[x][y] - 10) {
 		for (auto tip : tips) {
-			leftClick(tip.first, tip.second); // 翻开不是雷的块
+			if (m_map[tip.first][tip.second] == 19) { // 标红猜错的雷
+				m_map[tip.first][tip.second] = -1;
+				_markedCellNum = 0;
+			} else
+				leftClick(tip.first, tip.second); // 翻开不是雷的块
 		}
 	} else {
 		for (auto tip : tips) {

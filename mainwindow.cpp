@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -97,9 +96,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 	startY = menuHeight + cell_width;
 	startX = (width() - cell_width * n_width) / 2;
 	cntWidth = cell_width * 13 / 23;
-	// 绘制背景
-	// painter.setBrush(QBrush(QColor(192, 0, 0)));
-	// painter.drawRect(0, 0, 800, 600);
 
 	// 绘制雷数
 	int cnt = std::max(0, mineNum - mineMap->getMarkedCellNum());
@@ -141,8 +137,13 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 					cellSvgs[val - 20]->render(&painter, rect);
 				} else
 					cellSvgs[11]->render(&painter, rect);
-			} else // 提示格子
+			} else if (val < 60) { // 提示格子
 				cellSvgs[0]->render(&painter, rect);
+				mineMap->setVal(i, j, val + 10);
+			} else { // 一定时间后恢复提示格子
+				cellSvgs[0]->render(&painter, rect);
+				mineMap->setVal(i, j, val % 10);
+			}
 		}
 	}
 }
@@ -195,7 +196,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 				for (int j = y - 1; j <= y + 1; j++) {
 					if (i >= 0 && i < n_width && j >= 0 && j < n_height &&
 					    mineMap->getVal(i, j) >= 30) {
-						mineMap->setVal(i, j, mineMap->getVal(i, j) - 30);
+						mineMap->setVal(i, j, mineMap->getVal(i, j) % 10);
 					}
 				}
 			}
